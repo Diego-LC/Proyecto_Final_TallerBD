@@ -1,5 +1,3 @@
-# app/utils/helpers.py
-
 from datetime import datetime
 
 def obtener_fecha(prompt):
