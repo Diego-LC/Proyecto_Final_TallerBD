@@ -134,9 +134,6 @@ def opcion_visualizar_graficos(fecha_inicio, fecha_fin, tipo_clima, severidad, c
     # Extraer eventos climáticos de Neo4j
     eventos = neo4j.obtener_eventos_por_periodo(fecha_inicio, fecha_fin)
 
-    # Procesar eventos
-    #eventos = procesar_eventos(eventos)
-
     # Extraer accidentes de MongoDB
     accidentes = list(coleccion_mongodb.find({
         "Start_Time": {"$gte": fecha_inicio, "$lte": fecha_fin}
@@ -162,7 +159,7 @@ def opcion_visualizar_graficos(fecha_inicio, fecha_fin, tipo_clima, severidad, c
     periodo = f"{fecha_inicio.split('T')[0]} a {fecha_fin.split('T')[0]}"
 
     # Llamar a la función de graficación en plotting.py
-    graficar_combinado(conteo_tipo, conteo_severidad, periodo=periodo)
+    graficar_combinado(conteo_tipo, conteo_severidad, periodo=periodo, total_accidentes=len(resultados))
 
 def opcion_visualizar_mongodb(fecha_inicio, fecha_fin, coleccion_mongodb):
     if not fecha_inicio or not fecha_fin:
@@ -252,7 +249,7 @@ def opcion_graficar_accidentes_anuales(coleccion_mongodb, neo4j):
     print(f"Se encontraron {len(accidentes)} accidentes y {len(eventos)} eventos climáticos en {anio_seleccionado}")
     if tipo_analisis == '1':
         # Opciones de condiciones climáticas
-        condiciones_climaticas = ['Snow', 'Rain', 'Cold', 'Fog', 'Storm', 'Precipitation', 'Todos']
+        condiciones_climaticas = ['Snow', 'Rain', 'Cold', 'Fog', 'Storm', 'Precipitation', 'All']
         print("\nSelecciona la condición climática:")
         for idx, condicion in enumerate(condiciones_climaticas):
             print(f"{idx + 1}. {condicion}")
@@ -264,7 +261,7 @@ def opcion_graficar_accidentes_anuales(coleccion_mongodb, neo4j):
         print(f"\nGenerando gráfico de accidentes por condición climática en {anio_seleccionado}...")
         # Filtrar accidentes por condición climática seleccionada
         accidentes_filtrados = filtrar_accidentes_por_clima_optimizado(accidentes, eventos)
-        if condicion_seleccionada != 'Todos':
+        if condicion_seleccionada != 'All':
             accidentes_filtrados = filtrar_por_tipo_clima(accidentes_filtrados, condicion_seleccionada)
         print(f"Se encontraron {len(accidentes_filtrados)} accidentes en {anio_seleccionado}")
         # Contar accidentes por mes
@@ -273,7 +270,7 @@ def opcion_graficar_accidentes_anuales(coleccion_mongodb, neo4j):
             mes = int(acc['Accidente']["Start_Time"][5:7])  # Extraer el mes de la fecha
             conteo_mensual[mes] = conteo_mensual.get(mes, 0) + 1
         # Generar gráfico
-        graficar_accidentes_mensuales(anio_seleccionado, conteo_mensual, condicion_seleccionada, 'Condición Climática')
+        graficar_accidentes_mensuales(anio_seleccionado, conteo_mensual, condicion_seleccionada, 'Condición Climática', len(accidentes_filtrados))
     else:
         # Opciones de severidad
         severidades = ['1', '2', '3', '4']
@@ -295,7 +292,7 @@ def opcion_graficar_accidentes_anuales(coleccion_mongodb, neo4j):
             mes = int(acc['Accidente']["Start_Time"][5:7])  # Extraer el mes de la fecha
             conteo_mensual[mes] = conteo_mensual.get(mes, 0) + 1
         # Generar gráfico
-        graficar_accidentes_mensuales(anio_seleccionado, conteo_mensual, severidad_seleccionada, 'Severidad')
+        graficar_accidentes_mensuales(anio_seleccionado, conteo_mensual, severidad_seleccionada, 'Severidad', len(resultados))
 
 def main():
     # Conexión a MongoDB
