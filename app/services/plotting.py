@@ -58,17 +58,17 @@ def graficar_todas_condiciones_mongodb(counts, titles, x_labels, y_labels, field
                 bin_labels = [f"{bin_edges[i]:.2f}-{bin_edges[i+1]:.2f}" for i in range(len(bin_edges)-1)]
 
                 bars = ax.bar(bin_labels, counts_hist, color='coral')
-                ax.set_xlabel(xlabel, fontsize=12)
-                ax.set_ylabel(ylabel, fontsize=12)
-                ax.set_title(title, fontsize=14)
-                ax.tick_params(axis='x', rotation=45, labelsize=10)
+                ax.set_xlabel(xlabel, fontsize=10)
+                ax.set_ylabel(ylabel, fontsize=10)
+                ax.set_title(title, fontsize=12)
+                ax.tick_params(axis='x', rotation=22, labelsize=6)
                 ax.grid(axis='y', linestyle='--', alpha=0.7)
 
                 # Annotations
                 for bar in bars:
                     height = bar.get_height()
                     ax.text(bar.get_x() + bar.get_width() / 2, height + max(counts_hist)*0.01,
-                            f'{int(height)}', ha='center', va='bottom', fontsize=10, fontweight='bold')
+                            f'{int(height)}', ha='center', va='bottom', fontsize=8, fontweight='light')
 
             except ValueError as e:
                 ax.text(0.5, 0.5, f"Error processing data: {e}", 
@@ -83,7 +83,7 @@ def graficar_todas_condiciones_mongodb(counts, titles, x_labels, y_labels, field
             values = list(count.values())
 
             # Filter conditions with less than 50 data points
-            threshold = 200
+            threshold = 2000
             filtered_labels = []
             filtered_values = []
             others_total = 0
@@ -110,17 +110,17 @@ def graficar_todas_condiciones_mongodb(counts, titles, x_labels, y_labels, field
                             bbox=dict(facecolor='white', alpha=0.5))
 
             bars = ax.bar(filtered_labels, filtered_values, color=plt.cm.Paired.colors)
-            ax.set_xlabel(xlabel, fontsize=12)
-            ax.set_ylabel(ylabel, fontsize=12)
-            ax.set_title(title, fontsize=14)
-            ax.tick_params(axis='x', rotation=45, labelsize=10)
+            ax.set_xlabel(xlabel, fontsize=10)
+            ax.set_ylabel(ylabel, fontsize=10)
+            ax.set_title(title, fontsize=12)
+            ax.tick_params(axis='x', rotation=22, labelsize=6)
             ax.grid(axis='y', linestyle='--', alpha=0.7)
 
             # Annotations
             for bar in bars:
                 height = bar.get_height()
                 ax.text(bar.get_x() + bar.get_width() / 2, height + max(filtered_values)*0.01,
-                        f'{height}', ha='center', va='bottom', fontsize=10, fontweight='bold')
+                        f'{height}', ha='center', va='bottom', fontsize=8, fontweight='light')
 
     # Remove empty subplots if any
     for j in range(idx + 1, len(axs)):
@@ -132,7 +132,7 @@ def graficar_todas_condiciones_mongodb(counts, titles, x_labels, y_labels, field
             total_title += f'Period: {period}'
         if total_accidents:
             total_title += f'\nTotal Accidents: {total_accidents}' if period else f'Total Accidents: {total_accidents}'
-        fig.suptitle(total_title, fontsize=16, y=0.98)
+        fig.suptitle(total_title, fontsize=14, y=0.98)
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     plt.show()
@@ -174,6 +174,48 @@ def graficar_combinado(count_type, count_severity, period=None, total_accidents=
         if total_accidents:
             total_info += f'\nTotal Accidents: {total_accidents}' if period else f'Total Accidents: {total_accidents}'
         plt.figtext(0.95, 0.95, total_info, horizontalalignment='right', fontsize=12, bbox=dict(facecolor='white', alpha=0.5))
+
+    plt.tight_layout(rect=[0, 0, 1, 0.93])
+    plt.show()
+
+def graficar_combinado_neo4j(count_type, count_severity, period=None, total_events=None):
+    fig, axs = plt.subplots(1, 2, figsize=(18, 8))
+
+    # Events by Type
+    bars_type = axs[0].bar(count_type.keys(), count_type.values(), color=plt.cm.Paired.colors)
+    axs[0].set_xlabel("Event Type", fontsize=12)
+    axs[0].set_ylabel("Number of Events", fontsize=12)
+    axs[0].set_title("Number of Events by Type", fontsize=14)
+    axs[0].tick_params(axis='x', rotation=45, labelsize=10)
+    axs[0].grid(axis='y', linestyle='--', alpha=0.7)
+
+    for bar in bars_type:
+        height = bar.get_height()
+        axs[0].text(bar.get_x() + bar.get_width() / 2, height + max(count_type.values()) * 0.01,
+                    f'{height}', ha='center', va='bottom', fontsize=10, fontweight='bold')
+
+    # Events by Severity
+    bars_severity = axs[1].bar(count_severity.keys(), count_severity.values(), color=plt.cm.Set3.colors)
+    axs[1].set_xlabel("Event Severity", fontsize=12)
+    axs[1].set_ylabel("Number of Events", fontsize=12)
+    axs[1].set_title("Number of Events by Severity", fontsize=14)
+    axs[1].tick_params(axis='x', rotation=45, labelsize=10)
+    axs[1].grid(axis='y', linestyle='--', alpha=0.7)
+
+    for bar in bars_severity:
+        height = bar.get_height()
+        axs[1].text(bar.get_x() + bar.get_width() / 2, height + max(count_severity.values()) * 0.01,
+                    f'{height}', ha='center', va='bottom', fontsize=10, fontweight='bold')
+
+    # Add total event information in the top right corner
+    if period or total_events:
+        total_info = ''
+        if period:
+            total_info += f'Period: {period}\n'
+        if total_events:
+            total_info += f'Total Events: {total_events}'
+        plt.figtext(0.95, 0.95, total_info, horizontalalignment='right', fontsize=12,
+                    bbox=dict(facecolor='white', alpha=0.5))
 
     plt.tight_layout(rect=[0, 0, 1, 0.93])
     plt.show()

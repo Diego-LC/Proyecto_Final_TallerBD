@@ -15,7 +15,8 @@ from app.services.data_processing import (
 from app.services.plotting import (
     graficar_combinado,
     graficar_todas_condiciones_mongodb,
-    graficar_accidentes_mensuales
+    graficar_accidentes_mensuales,
+    graficar_combinado_neo4j
 )
 
 def mostrar_menu():
@@ -24,19 +25,20 @@ def mostrar_menu():
     print("2. Filtrar por tipo de clima")
     print("3. Filtrar por severidad del clima")
     print("4. Visualizar gráficos combinados")
-    print("5. Visualizar datos de MongoDB")
-    print("6. Generar gráfico de accidentes por condición climática o severidad en un año")
-    print("7. Salir")
+    print("5. Generar gráfico de accidentes por condición climática o severidad en un año")
+    print("6. Visualizar datos de MongoDB")
+    print("7. Visualizar datos de Neo4j")
+    print("8. Salir")
     print("==========================================")
 
 def seleccionar_opcion():
     while True:
         mostrar_menu()
         opcion = input("Selecciona una opción: ")
-        if opcion in ['1', '2', '3', '4', '5', '6', '7']:
+        if opcion in ['1', '2', '3', '4', '5', '6', '7', '8']:
             return opcion
         else:
-            print("Opción inválida. Por favor, elige una entre 1 y 7.")
+            print("Opción inválida. Intenta nuevamente.")
 
 def opcion_seleccionar_periodo():
     print("\n--- Selección de Período de Análisis ---")
@@ -213,8 +215,10 @@ def opcion_visualizar_mongodb(fecha_inicio, fecha_fin, coleccion_mongodb):
         etiquetas_y.append(info["etiqueta_y"])
         campos.append(campo)
 
+    periodo = f"{fecha_inicio.split('T')[0]} to {fecha_fin.split('T')[0]}"
+
     # Graficar todas las condiciones en un solo plot
-    graficar_todas_condiciones_mongodb(conteos, titulos, etiquetas_x, etiquetas_y, campos, period=f"{fecha_inicio} a {fecha_fin}")
+    graficar_todas_condiciones_mongodb(conteos, titulos, etiquetas_x, etiquetas_y, campos, period=periodo, total_accidents=len(accidentes))
 
 def opcion_graficar_accidentes_anuales(coleccion_mongodb, neo4j):
     print("\n--- Generación de Gráfico de Accidentes Mensuales ---")
@@ -294,6 +298,27 @@ def opcion_graficar_accidentes_anuales(coleccion_mongodb, neo4j):
         # Generar gráfico
         graficar_accidentes_mensuales(anio_seleccionado, conteo_mensual, severidad_seleccionada, 'Severidad', len(resultados))
 
+def opcion_visualizar_neo4j(fecha_inicio, fecha_fin, neo4j):
+    if not fecha_inicio or not fecha_fin:
+        print("Por favor, selecciona primero un período de análisis (Opción 1).")
+        return
+    print("\nBuscando datos de Neo4j para el período seleccionado...")
+
+    eventos = neo4j.obtener_eventos_por_periodo(fecha_inicio, fecha_fin)
+    total_eventos = len(eventos)
+    print(f"Se encontraron {total_eventos} eventos climáticos en Neo4j")
+
+    count_type = {}
+    count_severity = {}
+    for evento in eventos:
+        tipo = evento.get("EventType", "Unknown")
+        severidad = evento.get("Severity", "Unknown")
+        count_type[tipo] = count_type.get(tipo, 0) + 1
+        count_severity[severidad] = count_severity.get(severidad, 0) + 1
+
+    period_str = f"{fecha_inicio} to {fecha_fin}"
+    graficar_combinado_neo4j(count_type, count_severity, period=period_str, total_events=total_eventos)
+
 def main():
     # Conexión a MongoDB
     coleccion_mongodb = conectar_mongodb()
@@ -309,7 +334,6 @@ def main():
 
     while True:
         opcion = seleccionar_opcion()
-
         if opcion == '1':
             fecha_inicio, fecha_fin = opcion_seleccionar_periodo()
         elif opcion == '2':
@@ -318,16 +342,14 @@ def main():
             severidad = opcion_filtrar_severidad_clima()
         elif opcion == '4':
             opcion_visualizar_graficos(fecha_inicio, fecha_fin, tipo_clima, severidad, coleccion_mongodb, neo4j)
-            # Restablecer filtros
-            tipo_clima = None
-            severidad = None
         elif opcion == '5':
-            opcion_visualizar_mongodb(fecha_inicio, fecha_fin, coleccion_mongodb)
-        elif opcion == '6':
             opcion_graficar_accidentes_anuales(coleccion_mongodb, neo4j)
+        elif opcion == '6':
+            opcion_visualizar_mongodb(fecha_inicio, fecha_fin, coleccion_mongodb)
         elif opcion == '7':
-            print("Saliendo del programa...")
-            neo4j.close()
+            opcion_visualizar_neo4j(fecha_inicio, fecha_fin, neo4j)
+        elif opcion == '8':
+            print("Saliendo del programa.")
             break
 
 if __name__ == "__main__":
