@@ -14,17 +14,9 @@ from app.services.data_processing import (
 )
 from app.services.plotting import (
     graficar_combinado,
-    graficar_comparacion,
     graficar_todas_condiciones_mongodb,
     graficar_accidentes_mensuales
 )
-from app.utils.helpers import obtener_fecha
-
-def procesar_eventos(eventos):
-    df = pd.DataFrame(eventos)
-    df["StartTime"] = pd.to_datetime(df["StartTime"], utc=True)
-    df["EndTime"] = pd.to_datetime(df["EndTime"], utc=True)
-    return df.to_dict('records')
 
 def mostrar_menu():
     print("\n===== Menú de Análisis de Accidentes =====")
