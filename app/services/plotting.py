@@ -23,7 +23,7 @@ def plot_comparison(count, title, xlabel, ylabel, period=None):
     plt.tight_layout()
     plt.show()
 
-def plot_all_mongodb_conditions(counts, titles, x_labels, y_labels, fields, period=None, total_accidents=None):
+def graficar_todas_condiciones_mongodb(counts, titles, x_labels, y_labels, fields, period=None, total_accidents=None):
     # Create subplots dynamically based on the number of fields
     num_fields = len(fields)
     cols = 2
@@ -83,7 +83,7 @@ def plot_all_mongodb_conditions(counts, titles, x_labels, y_labels, fields, peri
             values = list(count.values())
 
             # Filter conditions with less than 50 data points
-            threshold = 50
+            threshold = 200
             filtered_labels = []
             filtered_values = []
             others_total = 0
@@ -137,7 +137,7 @@ def plot_all_mongodb_conditions(counts, titles, x_labels, y_labels, fields, peri
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     plt.show()
 
-def plot_composite(count_type, count_severity, period=None, total_accidents=None):
+def graficar_combinado(count_type, count_severity, period=None, total_accidents=None):
     fig, axs = plt.subplots(1, 2, figsize=(18, 8))
 
     # Accidents by Weather Type
@@ -178,7 +178,7 @@ def plot_composite(count_type, count_severity, period=None, total_accidents=None
     plt.tight_layout(rect=[0, 0, 1, 0.93])
     plt.show()
 
-def plot_monthly_accidents(year, monthly_count, selected_category, category_type, total_accidents=None):
+def graficar_accidentes_mensuales(year, monthly_count, selected_category, category_type, total_accidents=None):
     months = [month for month in range(1, 13)]
     quantities = [monthly_count.get(month, 0) for month in months]
     month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',

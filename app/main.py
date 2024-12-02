@@ -156,10 +156,10 @@ def opcion_visualizar_graficos(fecha_inicio, fecha_fin, tipo_clima, severidad, c
     conteo_severidad = contar_accidentes_por_categoria(resultados, "Severity")
 
     # Formatear período sin hora
-    periodo = f"{fecha_inicio.split('T')[0]} a {fecha_fin.split('T')[0]}"
+    periodo = f"{fecha_inicio.split('T')[0]} to {fecha_fin.split('T')[0]}"
 
     # Llamar a la función de graficación en plotting.py
-    graficar_combinado(conteo_tipo, conteo_severidad, periodo=periodo, total_accidentes=len(resultados))
+    graficar_combinado(conteo_tipo, conteo_severidad, period=periodo, total_accidents=len(resultados))
 
 def opcion_visualizar_mongodb(fecha_inicio, fecha_fin, coleccion_mongodb):
     if not fecha_inicio or not fecha_fin:
@@ -177,24 +177,24 @@ def opcion_visualizar_mongodb(fecha_inicio, fecha_fin, coleccion_mongodb):
     # Definir todas las condiciones a analizar
     condiciones = {
         "Weather_Condition": {
-            "titulo": "Número de Accidentes por Condición Climática",
-            "etiqueta_x": "Condición Climática",
-            "etiqueta_y": "Cantidad de Accidentes"
+            "titulo": "Number of Accidents by Weather Condition",
+            "etiqueta_x": "Weather Condition",
+            "etiqueta_y": "Number of Accidents"
         },
         "Precipitation(in)": {
-            "titulo": "Número de Accidentes por Precipitación",
-            "etiqueta_x": "Precipitación (in)",
-            "etiqueta_y": "Cantidad de Accidentes"
+            "titulo": "Number of Accidents by Precipitation",
+            "etiqueta_x": "Precipitation (in)",
+            "etiqueta_y": "Number of Accidents"
         },
         "Temperature(F)": {
-            "titulo": "Número de Accidentes por Temperatura",
-            "etiqueta_x": "Temperatura (F)",
-            "etiqueta_y": "Cantidad de Accidentes"
+            "titulo": "Number of Accidents by Temperature",
+            "etiqueta_x": "Temperature (F)",
+            "etiqueta_y": "Number of Accidents"
         },
         "Humidity(%)": {
-            "titulo": "Número de Accidentes por Humedad",
-            "etiqueta_x": "Humedad (%)",
-            "etiqueta_y": "Cantidad de Accidentes"
+            "titulo": "Number of Accidents by Humidity",
+            "etiqueta_x": "Humidity (%)",
+            "etiqueta_y": "Number of Accidents"
         }
     }
 
@@ -214,7 +214,7 @@ def opcion_visualizar_mongodb(fecha_inicio, fecha_fin, coleccion_mongodb):
         campos.append(campo)
 
     # Graficar todas las condiciones en un solo plot
-    graficar_todas_condiciones_mongodb(conteos, titulos, etiquetas_x, etiquetas_y, campos, periodo=f"{fecha_inicio} a {fecha_fin}")
+    graficar_todas_condiciones_mongodb(conteos, titulos, etiquetas_x, etiquetas_y, campos, period=f"{fecha_inicio} a {fecha_fin}")
 
 def opcion_graficar_accidentes_anuales(coleccion_mongodb, neo4j):
     print("\n--- Generación de Gráfico de Accidentes Mensuales ---")
@@ -270,7 +270,7 @@ def opcion_graficar_accidentes_anuales(coleccion_mongodb, neo4j):
             mes = int(acc['Accidente']["Start_Time"][5:7])  # Extraer el mes de la fecha
             conteo_mensual[mes] = conteo_mensual.get(mes, 0) + 1
         # Generar gráfico
-        graficar_accidentes_mensuales(anio_seleccionado, conteo_mensual, condicion_seleccionada, 'Condición Climática', len(accidentes_filtrados))
+        graficar_accidentes_mensuales(anio_seleccionado, conteo_mensual, condicion_seleccionada, 'Weather Condition', len(accidentes_filtrados))
     else:
         # Opciones de severidad
         severidades = ['1', '2', '3', '4']

@@ -27,7 +27,7 @@ def filtrar_accidentes_por_clima(accidentes, eventos):
             if accidente_fecha.tzinfo is None:
                 accidente_fecha = accidente_fecha.replace(tzinfo=timezone.utc)
         except ValueError:
-            print(f"Formato de fecha inválido en accidente ID {accidente.get('ID', 'Desconocido')}.")
+            print(f"Formato de fecha inválido en accidente ID {accidente.get('ID', 'Unknown')}.")
             continue
 
         accidente_lat = accidente["Start_Lat"]
@@ -134,6 +134,6 @@ def contar_accidentes_por_categoria(resultados, categoria):
 def contar_condiciones_ambientales_mongodb(accidentes, condicion):
     conteo = {}
     for accidente in accidentes:
-        clave = accidente.get(condicion, "Desconocido")
+        clave = accidente.get(condicion, "Unknown")
         conteo[clave] = conteo.get(clave, 0) + 1
     return conteo
