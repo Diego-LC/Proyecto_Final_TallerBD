@@ -2,3 +2,5 @@ pymongo
 neo4j
 matplotlib
 numpy
+pandas
+scikit-learn
