@@ -16,7 +16,7 @@ from app.services.plotting import (
     graficar_combinado,
     graficar_todas_condiciones_mongodb,
     graficar_accidentes_mensuales,
-    graficar_combinado_neo4j
+    graficar_neo4j
 )
 
 def mostrar_menu():
@@ -160,8 +160,8 @@ def opcion_visualizar_graficos(fecha_inicio, fecha_fin, tipo_clima, severidad, c
     # Formatear período sin hora
     periodo = f"{fecha_inicio.split('T')[0]} to {fecha_fin.split('T')[0]}"
 
-    # Llamar a la función de graficación en plotting.py
-    graficar_combinado(conteo_tipo, conteo_severidad, period=periodo, total_accidents=len(resultados))
+    # Llamar a la función de graficación en plotting.py con exportación
+    graficar_combinado(conteo_tipo, conteo_severidad, period=periodo, total_accidents=len(resultados), export=True)
 
 def opcion_visualizar_mongodb(fecha_inicio, fecha_fin, coleccion_mongodb):
     if not fecha_inicio or not fecha_fin:
@@ -316,8 +316,8 @@ def opcion_visualizar_neo4j(fecha_inicio, fecha_fin, neo4j):
         count_type[tipo] = count_type.get(tipo, 0) + 1
         count_severity[severidad] = count_severity.get(severidad, 0) + 1
 
-    period_str = f"{fecha_inicio} to {fecha_fin}"
-    graficar_combinado_neo4j(count_type, count_severity, period=period_str, total_events=total_eventos)
+    period_str = f"{fecha_inicio.split('T')[0]} to {fecha_fin.split('T')[0]}"
+    graficar_neo4j(count_type, count_severity, period=period_str, total_events=total_eventos)
 
 def main():
     # Conexión a MongoDB

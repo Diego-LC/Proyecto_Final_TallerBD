@@ -1,5 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import pandas as pd
+
+EXPORT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'exports')
+os.makedirs(EXPORT_DIR, exist_ok=True)
 
 def plot_comparison(count, title, xlabel, ylabel, period=None):
     plt.figure(figsize=(12, 8))
@@ -23,8 +28,17 @@ def plot_comparison(count, title, xlabel, ylabel, period=None):
     plt.tight_layout()
     plt.show()
 
-def graficar_todas_condiciones_mongodb(counts, titles, x_labels, y_labels, fields, period=None, total_accidents=None):
-    # Create subplots dynamically based on the number of fields
+def graficar_todas_condiciones_mongodb(counts, titles, x_labels, y_labels, fields, period=None, total_accidents=None, export=True):
+    import matplotlib.pyplot as plt
+
+    # Guardar datos en CSV
+    if export:
+        for count, field in zip(counts, fields):
+            df = pd.DataFrame(list(count.items()), columns=[field, 'Count'])
+            filename = f'mongodb/{field}_{period}.csv'
+            df.to_csv(os.path.join(EXPORT_DIR, filename), index=False)
+
+    # Generar gráficos
     num_fields = len(fields)
     cols = 2
     rows = (num_fields + 1) // 2
@@ -137,10 +151,20 @@ def graficar_todas_condiciones_mongodb(counts, titles, x_labels, y_labels, field
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     plt.show()
 
-def graficar_combinado(count_type, count_severity, period=None, total_accidents=None):
+def graficar_combinado(count_type, count_severity, period=None, total_accidents=None, export=True):
+    import matplotlib.pyplot as plt
+
+    # Guardar datos en CSV
+    if export:
+        df_type = pd.DataFrame(list(count_type.items()), columns=['EventType', 'Count'])
+        df_severity = pd.DataFrame(list(count_severity.items()), columns=['Severity', 'Count'])
+        df_type.to_csv(os.path.join(EXPORT_DIR, f'Combinated/type{period}.csv'), index=False)
+        df_severity.to_csv(os.path.join(EXPORT_DIR, f'Combinated/severity_{period}.csv'), index=False)
+
+    # Generar gráficos
     fig, axs = plt.subplots(1, 2, figsize=(18, 8))
 
-    # Accidents by Weather Type
+    # Events by Type
     bars_type = axs[0].bar(count_type.keys(), count_type.values(), color=plt.cm.Paired.colors)
     axs[0].set_xlabel("Weather Type", fontsize=12)
     axs[0].set_ylabel("Number of Accidents", fontsize=12)
@@ -153,7 +177,7 @@ def graficar_combinado(count_type, count_severity, period=None, total_accidents=
         axs[0].text(bar.get_x() + bar.get_width() / 2, height + max(count_type.values()) * 0.01,
                     f'{height}', ha='center', va='bottom', fontsize=10, fontweight='bold')
 
-    # Accidents by Climate Severity
+    # Events by Severity
     bars_severity = axs[1].bar(count_severity.keys(), count_severity.values(), color=plt.cm.Set3.colors)
     axs[1].set_xlabel("Climate Severity", fontsize=12)
     axs[1].set_ylabel("Number of Accidents", fontsize=12)
@@ -178,7 +202,17 @@ def graficar_combinado(count_type, count_severity, period=None, total_accidents=
     plt.tight_layout(rect=[0, 0, 1, 0.93])
     plt.show()
 
-def graficar_combinado_neo4j(count_type, count_severity, period=None, total_events=None):
+def graficar_neo4j(count_type, count_severity, period=None, total_events=None, export=True):
+    
+    if export:
+        df_type = pd.DataFrame(list(count_type.items()), columns=['EventType', 'Count'])
+        df_severity = pd.DataFrame(list(count_severity.items()), columns=['Severity', 'Count'])
+        filename_type = f'neo4j/count_type_neo4j_{period.replace(" ", "_")}.csv' if period else 'count_type_neo4j.csv'
+        filename_severity = f'neo4j/count_severity_neo4j_{period.replace(" ", "_")}.csv' if period else 'count_severity_neo4j.csv'
+        df_type.to_csv(os.path.join(EXPORT_DIR, filename_type), index=False)
+        df_severity.to_csv(os.path.join(EXPORT_DIR, filename_severity), index=False)
+
+    # Generar gráficos
     fig, axs = plt.subplots(1, 2, figsize=(18, 8))
 
     # Events by Type
@@ -220,7 +254,7 @@ def graficar_combinado_neo4j(count_type, count_severity, period=None, total_even
     plt.tight_layout(rect=[0, 0, 1, 0.93])
     plt.show()
 
-def graficar_accidentes_mensuales(year, monthly_count, selected_category, category_type, total_accidents=None):
+def graficar_accidentes_mensuales(year, monthly_count, selected_category, category_type, total_accidents=None, export=True):
     months = [month for month in range(1, 13)]
     quantities = [monthly_count.get(month, 0) for month in months]
     month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -233,6 +267,15 @@ def graficar_accidentes_mensuales(year, monthly_count, selected_category, catego
     plt.xticks(rotation=45, fontsize=10)
     plt.yticks(fontsize=10)
     plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    # Guardar datos en CSV
+    if export:
+        df = pd.DataFrame({
+            'Month': month_names,
+            'Accidents': quantities
+        })
+        filename = f'mensual/accidentes_mensuales_{year}_{selected_category.replace(" ", "_")}.csv'
+        df.to_csv(os.path.join(EXPORT_DIR, filename), index=False)
 
     if total_accidents:
         plt.figtext(0.95, 0.95, f'Total Accidents: {total_accidents}', horizontalalignment='right', fontsize=10, bbox=dict(facecolor='white', alpha=0.5))
